@@ -8,7 +8,7 @@
       "email": "marcin@incitosystems.com"
     }
   ],
-  "type": "project",
+  "type": "library",
   "require": {
     "php": ">=5.6"
   },
