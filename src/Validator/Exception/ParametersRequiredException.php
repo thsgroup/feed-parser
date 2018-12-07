@@ -2,6 +2,6 @@
 
 namespace Thsgroup\FeedParser\Validator\Exception;
 
-class ParametersOutputPathException extends \RuntimeException
+class ParametersRequiredException extends \RuntimeException
 {
 }
