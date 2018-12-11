@@ -6,6 +6,9 @@ php:
 - '7.1'
 
 before_script:
+- if [ $(phpenv version-name) = "5.6" ]; then cp -f composer.php56.json composer.json; fi
+- if [ $(phpenv version-name) = "7.0" ]; then cp -f composer.php70.json composer.json; fi
+- if [ $(phpenv version-name) = "7.1" ]; then cp -f composer.php71.json composer.json; fi
 - composer require --dev php-coveralls/php-coveralls
 - composer install
 
@@ -15,4 +18,3 @@ script:
 
 after_success:
 - travis_retry php vendor/bin/php-coveralls
-

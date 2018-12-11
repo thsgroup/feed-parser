@@ -1,0 +1,24 @@
+{
+  "name": "thsgroup/feed-parser-php",
+  "description": "Property data formats parser",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Marcin Kowalczyk",
+      "email": "marcin@incitosystems.com"
+    }
+  ],
+  "type": "library",
+  "require": {
+    "php": "^7.0",
+    "justinrainbow/json-schema": "^5.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Thsgroup\\FeedParser\\": "src/"
+    }
+  }
+}
