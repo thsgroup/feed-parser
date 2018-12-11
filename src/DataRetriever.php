@@ -12,19 +12,16 @@ class DataRetriever
         $this->directory = $directory;
     }
 
-    public function __destruct()
-    {
-        $this->removeDirectory($this->directory);
-    }
-
     /**
      * @return bool
      * @throws \RuntimeException
      */
     public function prepareDirectory()
     {
-        if (file_exists($this->directory) && !mkdir($newDirectory = $this->directory, 0777, true) && !is_dir($newDirectory)) {
-            throw new \RuntimeException('Directory: ' . $newDirectory . ' could not be created');
+        if(!file_exists($this->directory)) {
+            if (!@mkdir($newDirectory = $this->directory, 0777, true) && !is_dir($newDirectory)) {
+                throw new \RuntimeException('Directory: ' . $newDirectory . ' could not be created');
+            }
         }
 
         return true;
@@ -33,7 +30,7 @@ class DataRetriever
     /**
      * @param string $path
      */
-    private function removeDirectory($path)
+    public function removeDirectory($path)
     {
         $files = glob($path . '/*');
         foreach ($files as $file) {

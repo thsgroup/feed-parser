@@ -22,7 +22,7 @@ class ValidatorParameters implements ValidatorInterface
     );
 
     /**
-     * @param $data
+     * @param array $data
      * @return bool
      * @throws ParametersRequiredException
      */
@@ -47,7 +47,12 @@ class ValidatorParameters implements ValidatorInterface
         return true;
     }
 
-    public function validateValue($value, ConstraintInterface $constraint)
+    /**
+     * @param $value
+     * @param ConstraintInterface $constraint
+     * @return mixed
+     */
+    public function validateValue($value, $constraint)
     {
         $valid = $constraint->check($value);
         $this->errors = $constraint->getErrors();
@@ -63,9 +68,14 @@ class ValidatorParameters implements ValidatorInterface
         return $this->errors;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     */
     private function checkRequiredParameters($data)
     {
         $valid = count(array_diff(self::$requiredParameters, array_keys($data))) === 0;
+
         if (!$valid) {
             $this->errors['requiredParameters'] = 'Not all required parameters were provided, required: ' . implode(', ', self::$requiredParameters);
         }
