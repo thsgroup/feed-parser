@@ -52,7 +52,7 @@ class ValidatorParameters implements ValidatorInterface
      * @param ConstraintInterface $constraint
      * @return mixed
      */
-    public function validateValue($value, $constraint)
+    public function validateValue($value, ConstraintInterface $constraint)
     {
         $valid = $constraint->check($value);
         $this->errors = $constraint->getErrors();
