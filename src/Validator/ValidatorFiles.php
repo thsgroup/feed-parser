@@ -28,11 +28,15 @@ class ValidatorFiles implements ValidatorInterface
             return !isset($multipleFilesValidityCount['false']) ? true : false;
         }
 
-        if ($this->isStringUrl($data)) {
+        if (!empty($data) && $this->isStringUrl($data)) {
             return $this->validateValue($data, new UrlExistsConstraint());
         }
 
-        return $this->validateValue($data, new FileExistsConstraint());
+        if (!empty($data)) {
+            return $this->validateValue($data, new FileExistsConstraint());
+        }
+
+        return false;
     }
 
     public function validateValue($value, ConstraintInterface $constraint)
@@ -53,7 +57,7 @@ class ValidatorFiles implements ValidatorInterface
         return $this->errors;
     }
 
-    private function isStringUrl($data)
+    public function isStringUrl($data)
     {
         if (filter_var($data, FILTER_VALIDATE_URL)) {
             return true;
