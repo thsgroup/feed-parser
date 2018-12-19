@@ -93,14 +93,14 @@ class DataRetrieverTest extends TestCase
         return array(
             array(
                 array(
-                    'temp/1.txt',
-                    'temp/2.txt',
+                    'temp' . DIRECTORY_SEPARATOR . '1.txt',
+                    'temp' . DIRECTORY_SEPARATOR . '2.txt',
                     'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js',
                 ),
                 3
             ),
             array(
-                'temp/1.txt',
+                'temp' . DIRECTORY_SEPARATOR . '1.txt',
                 1
             )
         );
