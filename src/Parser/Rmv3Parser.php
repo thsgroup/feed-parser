@@ -47,7 +47,7 @@ class Rmv3Parser implements ParserInterface
         $this->isValidExtension();
         $this->setData(file_get_contents($this->filename));
 
-        $this->parseData();
+        return $this->parseData();
     }
 
     private function parseData()
@@ -65,8 +65,14 @@ class Rmv3Parser implements ParserInterface
         $dataRows = str_getcsv($this->dataBody, $this->dataHeader['eor']);
 
         foreach ($dataRows as $row) {
-            $row = $this->parseRow($row);
-            $result[] = array_combine($this->dataDefinition['columns'], $row);
+            if ($row !== null && $row !== '') {
+
+                $row = $this->parseRow($row);
+
+                if (count($row) === $this->dataDefinition['total']) {
+                    $result[] = array_combine($this->dataDefinition['columns'], $row);
+                }
+            }
         }
 
         return $result;
@@ -107,7 +113,7 @@ class Rmv3Parser implements ParserInterface
             throw new \RuntimeException('Not valid BLM file, definition section not found');
         }
 
-        $definitions = explode($this->dataHeader['eof'], $match[1]);
+        $definitions = array_map('trim', explode($this->dataHeader['eof'], $match[1]));
 
         $this->dataDefinition['total'] = count($definitions);
 
