@@ -2,119 +2,104 @@
 
 namespace Thsgroup\FeedParser\Mapper;
 
-use ReflectionClass;
-
 class Mapper
 {
     protected $map;
+    protected $outputFormat;
+    protected $variables;
 
     /**
-     * Mapper constructor.
+     * Mapper constructor,
      * @param array $map
+     * @param $outputFormat
+     * @param array $variables
      */
-    public function __construct($map)
+    public function __construct($map, $outputFormat, $variables)
     {
         $this->map = $map;
+        $this->outputFormat = $outputFormat;
+        $this->variables = $variables;
     }
 
-    private function map($sourceArr)
+    /**
+     * Map single data row to new array map
+     * @param $data
+     * @return mixed
+     */
+    public function map($data)
     {
+        $data = array_merge($data, $this->variables);
 
-    }
-
-    public function hydrate($data, $className = null, $depth = 0, $lastStringKey = null)
-    {
-        if ($className && is_array($data) && $depth === 0) {
-            $output = $this->createEntity($data, $className, $lastStringKey);
-        } else if ($depth !== 0 && is_array($data)) {
-            $output = $this->createArray($data, $className, $depth, $lastStringKey);
-        } else if (!is_array($data) && $className && $depth === 0) {
-            $output = $this->createInjectedEntity($data, $className);
-        } else {
-            $output = $data;
+        foreach ($data as $key => $val) {
+            $this->map[$this->outputFormat] = $this->recursiveArrayReplace($key, $val, $this->map[$this->outputFormat]);
         }
 
-        return $output;
+        $this->map[$this->outputFormat] = $this->removeEmptyElements($this->map[$this->outputFormat]);
+        return $this->map[$this->outputFormat];
     }
 
-    protected function createEntity($data, $className, $lastStringKey)
+    /**
+     * Remove all the mapping elements from map
+     * @param array $array
+     * @return array
+     */
+
+    protected function clearArray($array)
     {
-        $entity = new $className;
+        $pattern = '/\#(.*?)\#/';
 
-        $className = get_class($entity);
-        $reflectionClass = new ReflectionClass($className);
+        if (is_array($array)) {
+            foreach ($array as &$value) {
+                $value = $this->clearArray($value);
+            }
+            return $array;
+        }
 
-        foreach ($data as $key => $value) {
+        return preg_replace($pattern, '', $array, -1);
+    }
 
-            $field = $this->mapField($className, $key);
-            $value = $this->hydrate(
-                $value,
-                $this->getChildClass($field),
-                $this->getDepth($field),
-                $this->getStringKey($key, $lastStringKey)
-            );
+    /**
+     * Remove empty array elements (for example when no pictures provided)
+     * @param $haystack
+     * @return mixed
+     */
+    public function removeEmptyElements($haystack)
+    {
+        $pattern = '/\#(.*?)\#/';
 
-            $setter = $this->getSetter($field);
-            if (is_callable(array($entity, $setter))) {
-                $entity->$setter($value);
+        foreach ($haystack as $key => $value) {
+            if (is_array($value)) {
+                $haystack[$key] = $this->removeEmptyElements($haystack[$key]);
             } else {
-                $property = $this->getProperty($field);
-                if ($property && $reflectionClass->hasProperty($property)) {
-                    $reflectionProp = $reflectionClass->getProperty($property);
-                    $reflectionProp->setAccessible(true);
-                    $reflectionProp->setValue($entity, $value);
-                }
+                $haystack[$key] = preg_replace($pattern, '', $haystack[$key], -1);
+            }
+
+            if (empty($haystack[$key])) {
+                unset($haystack[$key]);
             }
         }
-        return $entity;
+
+        return $haystack;
     }
 
-    protected function createInjectedEntity($data, $className)
+    /**
+     * Replace definitions with values within mapping array
+     * @param $find
+     * @param $replace
+     * @param $array
+     * @return array|mixed
+     */
+    protected function recursiveArrayReplace($find, $replace, $array)
     {
-        try {
-            return new $className($data);
-        } catch (\Exception $e) {
-            return null;
+        if (!is_array($array)) {
+            return str_replace('#' . $find . '#', $replace, $array);
         }
-    }
 
-    protected function createArray($data, $className, $depth, $lastStringKey)
-    {
         $newArray = array();
-        $depth--;
-        foreach ($data as $key => $value) {
-            $newArray[$key] = $this->hydrate($value, $className, $depth, $this->getStringKey($key, $lastStringKey));
+
+        foreach ($array as $key => $value) {
+            $newArray[$key] = $this->recursiveArrayReplace($find, $replace, $value);
         }
         return $newArray;
-    }
-
-    protected function getStringKey($key, $lastStringKey)
-    {
-        return is_string($key) ? $key : $lastStringKey;
-    }
-
-    protected function mapField($className, $key)
-    {
-        return isset($this->map[$className][$key]) ? $this->map[$className][$key] : array('name' => $key);
-    }
-
-    protected function getChildClass($field)
-    {
-        return isset($field['class']) ? $field['class'] : null;
-    }
-
-    protected function getDepth($field)
-    {
-        return isset($field['depth']) ? $field['depth'] : 0;
-    }
-
-    protected function getSetter($field)
-    {
-        return 'set' . $this->getProperty($field);
-    }
-
-    protected function getProperty($field)
-    {
-        return isset($field['name']) ? $field['name'] : null;
     }
 }
