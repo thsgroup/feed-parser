@@ -34,6 +34,7 @@ class Mapper
             $this->map[$this->outputFormat] = $this->recursiveArrayReplace($key, $val, $this->map[$this->outputFormat]);
         }
 
+        $this->map[$this->outputFormat] = $this->updateIterativeSubArrays($data, $this->map[$this->outputFormat]);
         $this->map[$this->outputFormat] = $this->removeEmptyElements($this->map[$this->outputFormat]);
         return $this->map[$this->outputFormat];
     }
@@ -91,15 +92,38 @@ class Mapper
      */
     protected function recursiveArrayReplace($find, $replace, $array)
     {
+        $newArray = array();
+
         if (!is_array($array)) {
             return str_replace('#' . $find . '#', $replace, $array);
         }
 
-        $newArray = array();
-
         foreach ($array as $key => $value) {
+
             $newArray[$key] = $this->recursiveArrayReplace($find, $replace, $value);
         }
+
         return $newArray;
+    }
+
+    protected function updateIterativeSubArrays($data, $formattedArray)
+    {
+//        foreach ($formattedArray as $key => $val) {
+//
+//            if (preg_match('/@(.*?)@/', $key) === 1) {
+//
+//                //iterative element found, we need to create subarray
+//                $elements = explode('--', str_replace('@', '', $key));
+//                $pattern = '/' . $elements[1] . '([0-9]+)/';
+//
+//                for($i=0;$i<=99, $i++) {
+//
+//                }
+//
+//            } else if(is_array($val) && preg_match('/@(.*?)@/', $key) !== 1) {
+//
+//                $this->updateIterativeSubArrays($data, $val);
+//            }
+//        }
     }
 }

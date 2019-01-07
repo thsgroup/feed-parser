@@ -68,13 +68,12 @@ return array(
                     'accessibility' => null,
                     'heating' => null,
                 ),
-                'media' => array(
-                    'media_type' => '#media_type#',
-                    'media_url' => '#media_url#',
-                    'caption' => '#media_caption#',
-                    'sort_order' => '#media_sort_order#',
-                    'media_update_date' => '#media_update_date#'
-                ),
+                '@media--MEDIA_IMAGE_@' =>
+                    array(
+                        'media_type' => '1',
+                        'media_url' => '#MEDIA_IMAGE_#',
+                        'caption' => '#MEDIA_IMAGE_TEXT_#',
+                    ),
             ),
         ),
 );
