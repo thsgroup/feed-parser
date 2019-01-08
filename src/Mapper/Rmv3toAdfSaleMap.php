@@ -70,7 +70,7 @@ return array(
                 ),
                 '@media--MEDIA_IMAGE_@' =>
                     array(
-                        'media_type' => '1',
+                        'media_type' => '#_media_type_image#',
                         'media_url' => '#MEDIA_IMAGE_#',
                         'caption' => '#MEDIA_IMAGE_TEXT_#',
                     ),

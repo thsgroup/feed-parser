@@ -35,6 +35,7 @@ class Mapper
         }
 
         $this->map[$this->outputFormat] = $this->updateIterativeSubArrays($data, $this->map[$this->outputFormat]);
+
         $this->map[$this->outputFormat] = $this->removeEmptyElements($this->map[$this->outputFormat]);
         return $this->map[$this->outputFormat];
     }
@@ -106,24 +107,67 @@ class Mapper
         return $newArray;
     }
 
+    /**
+     * @param $data
+     * @param $formattedArray
+     * @return mixed
+     */
     protected function updateIterativeSubArrays($data, $formattedArray)
     {
-//        foreach ($formattedArray as $key => $val) {
-//
-//            if (preg_match('/@(.*?)@/', $key) === 1) {
-//
-//                //iterative element found, we need to create subarray
-//                $elements = explode('--', str_replace('@', '', $key));
-//                $pattern = '/' . $elements[1] . '([0-9]+)/';
-//
-//                for($i=0;$i<=99, $i++) {
-//
-//                }
-//
-//            } else if(is_array($val) && preg_match('/@(.*?)@/', $key) !== 1) {
-//
-//                $this->updateIterativeSubArrays($data, $val);
-//            }
-//        }
+        $newArray = $formattedArray;
+
+        foreach ($formattedArray as $key => $val) {
+
+            if (is_array($val) && preg_match('/@(.*?)@/', $key) === 1) {
+
+                //iterative element found, we need to create subarray
+                $elements = explode('--', str_replace('@', '', $key));
+                $subArray = array();
+                $existingIdents = array();
+
+                foreach ($val as $subKey => $subVal) {
+
+                    //TODO: find all integers used on iterative elements like MEDIA_IMAGE_01-99. Then use it instead of 0-99 loop
+
+                    for ($i = 0; $i <= 99; $i++) {
+
+                        $newKey = str_replace('#', '', $subVal) . str_pad($i, 2, 0, STR_PAD_LEFT);
+
+                        if (isset($data[$newKey]) && $data[$newKey] !== '') {
+                            $subArray[$i][$subKey] = $data[$newKey];
+                            $existingIdents[] = $i;
+                        } else if ($subVal !== '' && substr_count($subVal, '#') < 2) {
+                            $subArray[$i][$subKey] = $subVal;
+                        }
+                    }
+                }
+
+                $this->tidySubArray($subArray, $existingIdents);
+
+                $newArray[$elements[0]] = $subArray;
+                unset($newArray[$key]);
+            }
+
+            if (is_array($val) && preg_match('/@(.*?)@/', $key) !== 1) {
+
+                $newArray[$key] = $this->updateIterativeSubArrays($data, $val);
+            }
+        }
+
+        return $newArray;
+    }
+
+    /**
+     * Remove empty elements from sub array (for example media)
+     * @param $subArray
+     * @param $existingIdents
+     * @return array
+     */
+    protected function tidySubArray($subArray, $existingIdents)
+    {
+        return array_filter($subArray, function ($key) use ($existingIdents, $subArray) {
+
+            return !(isset($subArray[$key]) && !in_array($key, $existingIdents, true));
+        }, ARRAY_FILTER_USE_KEY);
     }
 }
