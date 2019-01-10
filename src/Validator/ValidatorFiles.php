@@ -59,10 +59,6 @@ class ValidatorFiles implements ValidatorInterface
 
     public function isStringUrl($data)
     {
-        if (filter_var($data, FILTER_VALIDATE_URL)) {
-            return true;
-        }
-
-        return false;
+        return filter_var($data, FILTER_VALIDATE_URL) && in_array(parse_url($data, PHP_URL_SCHEME), array('http', 'https', 'ftp'));
     }
 }

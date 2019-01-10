@@ -16,6 +16,7 @@ class ParsingProcess
     protected $parameters;
     protected $variables;
     protected $files;
+    protected $output;
 
     /**
      * ParsingProcess constructor.
@@ -30,6 +31,7 @@ class ParsingProcess
         $this->parameters = $parameters;
         $this->variables = $variables;
         $this->files = $files;
+        $this->output = array();
     }
 
     public function process()
@@ -64,18 +66,12 @@ class ParsingProcess
 
     private function validateParametersFiles()
     {
-        if ($this->validatorParameters->validate($this->parameters)) {
-
-            if ($this->validatorFiles->validate($this->files)) {
-                return true;
-            }
-            //TODO: custom exceptions
-            throw new \RuntimeException('INVALID OR MISSING FILE(S)');
-
+        if ($this->validatorParameters->validate($this->parameters) && $this->validatorFiles->validate($this->files)) {
+            return true;
         }
 
         //TODO: custom exceptions
-        throw new \RuntimeException('INVALID PARAMETERS');
+        throw new \RuntimeException('INVALID PARAMETERS OR FILES');
     }
 
     private function processData($data)
@@ -104,11 +100,9 @@ class ParsingProcess
 
     private function outputData($data, $ident)
     {
-        $output = null;
-
         if (!empty($data) && $this->parameters['formatOutput'] === 'adf' && $this->parameters['filenamePrefixOutput'] === null) {
 
-            $output = $this->processData($data);
+            $this->output[] = $this->processData($data);
 
         } else if ($this->parameters['filenamePrefixOutput'] !== null) {
 
@@ -119,13 +113,13 @@ class ParsingProcess
             $outputter = new DataOutputter($this->parameters['dirOutput']);
             $outputter->store($json, $filename);
 
-            $output = $filename;
+            $this->output[] = $filename;
 
         } else {
             //TODO: custom exceptions
             throw new \RuntimeException('INVALID DATA');
         }
 
-        return $output;
+        return $this->output;
     }
 }
