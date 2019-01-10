@@ -142,7 +142,7 @@ class Mapper
                     }
                 }
 
-                $this->tidySubArray($subArray, $existingIdents);
+                $subArray = $this->tidySubArray($subArray, $existingIdents);
 
                 $newArray[$elements[0]] = $subArray;
                 unset($newArray[$key]);
@@ -167,7 +167,8 @@ class Mapper
     {
         return array_filter($subArray, function ($key) use ($existingIdents, $subArray) {
 
-            return !(isset($subArray[$key]) && !in_array($key, $existingIdents, true));
+            return isset($subArray[$key]) && in_array($key, $existingIdents, true);
+
         }, ARRAY_FILTER_USE_KEY);
     }
 }
