@@ -115,9 +115,6 @@ class ParsingProcess
 
             $this->output[] = $filename;
 
-        } else {
-            //TODO: custom exceptions
-            throw new \RuntimeException('INVALID DATA');
         }
 
         return $this->output;

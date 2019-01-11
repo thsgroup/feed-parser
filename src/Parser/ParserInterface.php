@@ -6,7 +6,5 @@ interface ParserInterface
 {
     public function setData($data);
 
-    public function getData();
-
     public function process();
 }

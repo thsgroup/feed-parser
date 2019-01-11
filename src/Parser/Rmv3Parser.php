@@ -11,27 +11,11 @@ class Rmv3Parser implements ParserInterface
     private $dataBody;
 
     /**
-     * @return mixed
-     */
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
      * @param mixed $data
      */
     public function setData($data)
     {
         $this->data = $data;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getFilename()
-    {
-        return $this->filename;
     }
 
     /**
@@ -117,7 +101,7 @@ class Rmv3Parser implements ParserInterface
 
         $this->dataDefinition['total'] = count($definitions);
 
-        if ($this->dataDefinition['total'] === 0) {
+        if ($this->dataDefinition['total'] <= 1) {
             throw new \RuntimeException('Not valid BLM file, field definitions invalid or empty');
         }
 

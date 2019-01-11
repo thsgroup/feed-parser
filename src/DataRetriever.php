@@ -75,11 +75,9 @@ class DataRetriever
 
     private function moveFile($file)
     {
-        if (!filter_var($file, FILTER_VALIDATE_URL) && !@rename(realpath($file), $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
-            throw new \RuntimeException('File could not be moved: ' . realpath($file));
-        }
+        $file = filter_var($file, FILTER_VALIDATE_URL) ? $file : realpath($file);
 
-        if (filter_var($file, FILTER_VALIDATE_URL) && !@copy($file, $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
+        if (!@copy($file, $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
             throw new \RuntimeException('File could not be copied: ' . $file);
         }
 

@@ -41,26 +41,6 @@ class Mapper
     }
 
     /**
-     * Remove all the mapping elements from map
-     * @param array $array
-     * @return array
-     */
-
-    protected function clearArray($array)
-    {
-        $pattern = '/\#(.*?)\#/';
-
-        if (is_array($array)) {
-            foreach ($array as &$value) {
-                $value = $this->clearArray($value);
-            }
-            return $array;
-        }
-
-        return preg_replace($pattern, '', $array, -1);
-    }
-
-    /**
      * Remove empty array elements (for example when no pictures provided)
      * @param $haystack
      * @return mixed
