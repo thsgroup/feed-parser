@@ -7,15 +7,18 @@ use Thsgroup\FeedParser\Parser\ParserFactory;
 use Thsgroup\FeedParser\Parser\ParserInterface;
 use Thsgroup\FeedParser\Validator\ValidatorFiles;
 use Thsgroup\FeedParser\Validator\ValidatorParameters;
+use Thsgroup\FeedParser\Validator\ValidatorSchema;
 
 class ParsingProcess
 {
 
     protected $validatorParameters;
     protected $validatorFiles;
+    protected $validatorSchema;
     protected $parameters;
     protected $variables;
     protected $files;
+    protected $output;
 
     /**
      * ParsingProcess constructor.
@@ -27,9 +30,11 @@ class ParsingProcess
     {
         $this->validatorParameters = new ValidatorParameters();
         $this->validatorFiles = new ValidatorFiles();
+        $this->validatorSchema = new ValidatorSchema($parameters);
         $this->parameters = $parameters;
         $this->variables = $variables;
         $this->files = $files;
+        $this->output = array();
     }
 
     public function process()
@@ -59,28 +64,28 @@ class ParsingProcess
             }
         }
 
+        if (!$this->validatorSchema->validate($output)) {
+            throw new \RuntimeException('ONE OR MORE PROVIDED FILE CONTAINS ERRORS');
+        }
+
         return $output;
     }
 
     private function validateParametersFiles()
     {
-        if ($this->validatorParameters->validate($this->parameters)) {
-
-            if ($this->validatorFiles->validate($this->files)) {
-                return true;
-            }
-            //TODO: custom exceptions
-            throw new \RuntimeException('INVALID OR MISSING FILE(S)');
-
+        if ($this->validatorParameters->validate($this->parameters) && $this->validatorFiles->validate($this->files)) {
+            return true;
         }
 
         //TODO: custom exceptions
-        throw new \RuntimeException('INVALID PARAMETERS');
+        throw new \RuntimeException('INVALID PARAMETERS OR FILES');
     }
 
     private function processData($data)
     {
-        $res = array();
+        $mapperOut = array();
+        $mapperSettings = array();
+        $mapperHeader = array();
 
         foreach ($data as $row) {
 
@@ -96,36 +101,39 @@ class ParsingProcess
             }
 
             $mapper = new Mapper($map, $this->parameters['formatOutput'], $this->variables);
-            $res[] = $mapper->map($row);
+            $mapperRes = $mapper->map($row);
+
+            $mapperSettings = $mapperRes['settings'];
+            $mapperHeader = $mapperRes['header'];
+            if (!empty($mapperRes['data'])) {
+                $mapperOut[] = $mapperRes['data'];
+            }
         }
+
+        $res = $mapperHeader;
+        $res[$mapperSettings['data']] = $mapperOut;
 
         return $this->parameters['formatOutput'] === 'adf' ? json_encode($res) : $res;
     }
 
     private function outputData($data, $ident)
     {
-        $output = null;
-
         if (!empty($data) && $this->parameters['formatOutput'] === 'adf' && $this->parameters['filenamePrefixOutput'] === null) {
 
-            $output = $this->processData($data);
+            $this->output[] = $this->processData($data);
 
         } else if ($this->parameters['filenamePrefixOutput'] !== null) {
 
             $json = $this->processData($data);
 
-            $filename = $this->parameters['filenamePrefixOutput'] . '_' . $ident . '_adf.json';
+            $filename = $this->parameters['filenamePrefixOutput'] . '_' . $ident . '.json';
 
             $outputter = new DataOutputter($this->parameters['dirOutput']);
             $outputter->store($json, $filename);
 
-            $output = $filename;
-
-        } else {
-            //TODO: custom exceptions
-            throw new \RuntimeException('INVALID DATA');
+            $this->output[] = $filename;
         }
 
-        return $output;
+        return $this->output;
     }
 }

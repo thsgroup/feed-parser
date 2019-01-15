@@ -1,17 +1,24 @@
 <?php
 
 return array(
-    'adf' =>
-        array(
-            'network' => array(
-                'network_id' => '#_network_id#',
+    'adf' => array(
+        'settings' => array(
+            'root' => 'adf_heading',
+            'data' => 'property'
+        ),
+        'adf_heading' =>
+            array(
+                'network' => array(
+                    'network_id' => '#_network_id#',
+                ),
+                'branch' => array(
+                    'branch_id' => '#BRANCH_ID#',
+                    'channel' => '#_channel#',
+                    'overseas' => '#_overseas#',
+                ),
             ),
-            'branch' => array(
-                'branch_id' => '#BRANCH_ID#',
-                'channel' => '#_channel#',
-                'overseas' => '#_overseas#',
-            ),
-            'property' => array(
+        'property' =>
+            array(
                 'agent_ref' => '#AGENT_REF#',
                 'published' => '#PUBLISHED_FLAG#',
                 'property_type' => '#PROP_SUB_ID#',
@@ -75,5 +82,5 @@ return array(
                         'caption' => '#MEDIA_IMAGE_TEXT_#',
                     ),
             ),
-        ),
+    )
 );

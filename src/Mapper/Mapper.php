@@ -30,14 +30,23 @@ class Mapper
     {
         $data = array_merge($data, $this->variables);
 
+        $output_settings = isset($this->map[$this->outputFormat]['settings']) ? $this->map[$this->outputFormat]['settings'] : array();
+        $output_header = isset($output_settings['root'], $this->map[$this->outputFormat][$output_settings['root']]) ? $this->map[$this->outputFormat][$output_settings['root']] : array();
+        $output_data = isset($output_settings['data'], $this->map[$this->outputFormat][$output_settings['data']]) ? $this->map[$this->outputFormat][$output_settings['data']] : array();
+
         foreach ($data as $key => $val) {
-            $this->map[$this->outputFormat] = $this->recursiveArrayReplace($key, $val, $this->map[$this->outputFormat]);
+            $output_header = $this->recursiveArrayReplace($key, $val, $output_header);
         }
 
-        $this->map[$this->outputFormat] = $this->updateIterativeSubArrays($data, $this->map[$this->outputFormat]);
+        foreach ($data as $key => $val) {
+            $output_data = $this->recursiveArrayReplace($key, $val, $output_data);
+        }
 
-        $this->map[$this->outputFormat] = $this->removeEmptyElements($this->map[$this->outputFormat]);
-        return $this->map[$this->outputFormat];
+        $output_data = $this->updateIterativeSubArrays($data, $output_data);
+        $output_header = $this->removeEmptyElements($output_header);
+        $output_data = $this->removeEmptyElements($output_data);
+
+        return array('settings' => $output_settings, 'header' => $output_header, 'data' => $output_data);
     }
 
     /**
