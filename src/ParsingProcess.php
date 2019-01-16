@@ -85,7 +85,7 @@ class ParsingProcess
     {
         $mapperOut = array();
         $mapperSettings = array();
-        $mapperHeader = array();
+        $mapperRoot = array();
 
         foreach ($data as $row) {
 
@@ -104,14 +104,18 @@ class ParsingProcess
             $mapperRes = $mapper->map($row);
 
             $mapperSettings = $mapperRes['settings'];
-            $mapperHeader = $mapperRes['header'];
+            $mapperRoot = $mapperRes['root'];
+
             if (!empty($mapperRes['data'])) {
                 $mapperOut[] = $mapperRes['data'];
             }
         }
 
-        $res = $mapperHeader;
-        $res[$mapperSettings['data']] = $mapperOut;
+        $res = $mapperRoot;
+
+        if (!empty($mapperOut)) {
+            $res[$mapperSettings['data']] = json_decode(json_encode($mapperOut), true);
+        }
 
         return $this->parameters['formatOutput'] === 'adf' ? json_encode($res) : $res;
     }

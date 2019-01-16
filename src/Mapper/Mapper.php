@@ -31,22 +31,26 @@ class Mapper
         $data = array_merge($data, $this->variables);
 
         $output_settings = isset($this->map[$this->outputFormat]['settings']) ? $this->map[$this->outputFormat]['settings'] : array();
-        $output_header = isset($output_settings['root'], $this->map[$this->outputFormat][$output_settings['root']]) ? $this->map[$this->outputFormat][$output_settings['root']] : array();
+        $output_root = isset($output_settings['root'], $this->map[$this->outputFormat][$output_settings['root']]) ? $this->map[$this->outputFormat][$output_settings['root']] : array();
         $output_data = isset($output_settings['data'], $this->map[$this->outputFormat][$output_settings['data']]) ? $this->map[$this->outputFormat][$output_settings['data']] : array();
 
         foreach ($data as $key => $val) {
-            $output_header = $this->recursiveArrayReplace($key, $val, $output_header);
+            $output_root = $this->recursiveArrayReplace($key, $val, $output_root);
         }
 
         foreach ($data as $key => $val) {
             $output_data = $this->recursiveArrayReplace($key, $val, $output_data);
         }
 
-        $output_data = $this->updateIterativeSubArrays($data, $output_data);
-        $output_header = $this->removeEmptyElements($output_header);
-        $output_data = $this->removeEmptyElements($output_data);
+        $output_root = $this->updateIterativeSubArrays($data, $output_root);
+        $output_root = $this->removeEmptyElements($output_root);
 
-        return array('settings' => $output_settings, 'header' => $output_header, 'data' => $output_data);
+        if (!empty($output_data)) {
+            $output_data = $this->updateIterativeSubArrays($data, $output_data);
+            $output_data = $this->removeEmptyElements($output_data);
+        }
+
+        return array('settings' => $output_settings, 'root' => $output_root, 'data' => $output_data);
     }
 
     /**
@@ -81,7 +85,7 @@ class Mapper
         foreach ($haystack as $key => $value) {
             if (is_array($value)) {
                 $haystack[$key] = $this->removeEmptyElements($haystack[$key]);
-            } else {
+            } else if (preg_match($pattern, $haystack[$key]) === 1) {
                 $haystack[$key] = preg_replace($pattern, '', $haystack[$key], -1);
             }
 
@@ -105,11 +109,22 @@ class Mapper
         $newArray = array();
 
         if (!is_array($array)) {
-            return str_replace('#' . $find . '#', $replace, $array);
+
+            $type = $this->getType($array);
+
+            if ($type && !is_array($type) && ('#{' . $type . '}' . $find . '#' === $array)) {
+
+                $array = str_replace('#{' . $type . '}' . $find . '#', $replace, $array);
+                settype($array, $type);
+
+            } else if ('#' . $find . '#' === $array) {
+                $array = str_replace('#' . $find . '#', $replace, $array);
+            }
+
+            return $array;
         }
 
         foreach ($array as $key => $value) {
-
             $newArray[$key] = $this->recursiveArrayReplace($find, $replace, $value);
         }
 
@@ -151,7 +166,7 @@ class Mapper
                     }
                 }
 
-                $this->tidySubArray($subArray, $existingIdents);
+                $subArray = $this->tidySubArray($subArray, $existingIdents);
 
                 $newArray[$elements[0]] = $subArray;
                 unset($newArray[$key]);
@@ -178,5 +193,16 @@ class Mapper
 
             return !(isset($subArray[$key]) && !in_array($key, $existingIdents, true));
         }, ARRAY_FILTER_USE_KEY);
+    }
+
+    private function getType($value)
+    {
+        $type = false;
+
+        if (preg_match('/\{[a-z]+\}/', $value, $type) === 1) {
+            $type = str_replace(array('{', '}'), '', $type[0]);
+        }
+
+        return $type;
     }
 }

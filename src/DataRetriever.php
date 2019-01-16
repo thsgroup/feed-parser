@@ -75,7 +75,7 @@ class DataRetriever
 
     private function moveFile($file)
     {
-        if (!@rename(realpath($file), $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
+        if (!@copy(realpath($file), $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
             throw new \RuntimeException('File could not be moved: ' . realpath($file));
         }
 

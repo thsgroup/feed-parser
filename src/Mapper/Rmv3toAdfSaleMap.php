@@ -3,27 +3,27 @@
 return array(
     'adf' => array(
         'settings' => array(
-            'root' => 'adf_heading',
-            'data' => 'property'
+            'root' => 'adf_root',
+            'data' => null,
+            'new_home' => array(
+                'N' => true
+            )
         ),
-        'adf_heading' =>
-            array(
-                'network' => array(
-                    'network_id' => '#_network_id#',
-                ),
-                'branch' => array(
-                    'branch_id' => '#BRANCH_ID#',
-                    'channel' => '#_channel#',
-                    'overseas' => '#_overseas#',
-                ),
+        'adf_root' => array(
+            'network' => array(
+                'network_id' => '#{int}_network_id#',
             ),
-        'property' =>
-            array(
+            'branch' => array(
+                'branch_id' => '#{int}BRANCH_ID#',
+                'channel' => '#{int}_channel#',
+                'overseas' => '#{bool}_overseas#',
+            ),
+            'property' => array(
                 'agent_ref' => '#AGENT_REF#',
-                'published' => '#PUBLISHED_FLAG#',
-                'property_type' => '#PROP_SUB_ID#',
-                'status' => '#STATUS_ID#',
-                'new_home' => '#NEW_HOME_FLAG#',
+                'published' => '#{bool}PUBLISHED_FLAG#',
+                'property_type' => '#{int}PROP_SUB_ID#',
+                'status' => '#{int}STATUS_ID#',
+                'new_home' => '#{bool}NEW_HOME_FLAG#',
                 'create_date' => '#CREATE_DATE#',
                 'update_date' => '#UPDATE_DATE#',
                 'address' => array(
@@ -44,8 +44,8 @@ return array(
                     'pov_zoom' => null,
                 ),
                 'price_information' => array(
-                    'price' => '#PRICE#',
-                    'price_qualifier' => '#PRICE_QUALIFIER#',
+                    'price' => '#{double}PRICE#',
+                    'price_qualifier' => '#{int}PRICE_QUALIFIER#',
                 ),
                 'details' => array(
                     'summary' => '#SUMMARY#',
@@ -62,25 +62,25 @@ return array(
                         '#FEATURE9#',
                         '#FEATURE10#',
                     ),
-                    'bedrooms' => '#BEDROOMS#',
-                    'bathrooms' => '#BATHROOMS#',
-                    'reception_rooms' => '#LIVING_ROOMS#',
+                    'bedrooms' => '#{int}BEDROOMS#',
+                    'bathrooms' => '#{int}BATHROOMS#',
+                    'reception_rooms' => '#{int}LIVING_ROOMS#',
                     'parking' => null,
                     'outside_space' => null,
                     'year_built' => null,
-                    'internal_area' => '#MAX_SIZE_ENTERED#',
-                    'internal_area_unit' => '#AREA_SIZE_UNIT_ID#',
+                    'internal_area' => '#{int}MAX_SIZE_ENTERED#',
+                    'internal_area_unit' => '#{int}AREA_SIZE_UNIT_ID#',
                     'entrance_floor' => null,
                     'condition' => null,
                     'accessibility' => null,
                     'heating' => null,
                 ),
-                '@media--MEDIA_IMAGE_@' =>
-                    array(
-                        'media_type' => '#_media_type_image#',
-                        'media_url' => '#MEDIA_IMAGE_#',
-                        'caption' => '#MEDIA_IMAGE_TEXT_#',
-                    ),
+                '@media--MEDIA_IMAGE_@' => array(
+                    'media_type' => '#{int}_media_type_image#',
+                    'media_url' => '#MEDIA_IMAGE_#',
+                    'caption' => '#MEDIA_IMAGE_TEXT_#',
+                ),
             ),
+        ),
     )
 );
