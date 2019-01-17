@@ -85,7 +85,6 @@ class ParsingProcess
     {
         $mapperOut = array();
         $mapperSettings = array();
-        $mapperRoot = array();
 
         foreach ($data as $row) {
 
@@ -100,20 +99,30 @@ class ParsingProcess
                 $variables['_channel'] = 2;
             }
 
-            $mapper = new Mapper($map, $this->parameters['formatOutput'], $this->variables);
-            $mapperRes = $mapper->map($row);
+            if (!empty($map)) {
+                $mapper = new Mapper($map, $this->parameters['formatOutput'], $this->variables);
+                $mapperRes = $mapper->map($row);
 
-            $mapperSettings = $mapperRes['settings'];
-            $mapperRoot = $mapperRes['root'];
+                $mapperSettings = $mapperRes['settings'];
+                $mapperRoot = $mapperRes['root'];
 
-            if (!empty($mapperRes['data'])) {
-                $mapperOut[] = $mapperRes['data'];
+                if (!empty($mapperRes['data'])) {
+                    $mapperOut[] = $mapperRes['data'];
+                } else {
+                    $mapperOut[] = $mapperRoot;
+                }
+
+
+
+                unset($mapper);
+            } else {
+                throw new \RuntimeException('MAP INVALID OR NOT PROVIDED');
             }
         }
 
-        $res = $mapperRoot;
+        $res = !empty($mapperOut) ? $mapperOut : null;
 
-        if (!empty($mapperOut)) {
+        if (!empty($mapperOut) && isset($mapperSettings['data'])) {
             $res[$mapperSettings['data']] = json_decode(json_encode($mapperOut), true);
         }
 
