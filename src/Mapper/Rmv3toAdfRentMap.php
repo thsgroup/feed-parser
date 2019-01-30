@@ -5,8 +5,12 @@ return array(
         'settings' => array(
             'root' => 'adf_root',
             'data' => null,
-            'new_home' => array(
-                'N' => true
+            'mappings' => array(
+                'new_home' => array(
+                    'Y' => true,
+                    'N' => false,
+                    '' => false
+                )
             )
         ),
         'adf_root' => array(

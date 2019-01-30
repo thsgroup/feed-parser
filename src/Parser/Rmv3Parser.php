@@ -9,6 +9,23 @@ class Rmv3Parser implements ParserInterface
     private $dataHeader;
     private $dataDefinition;
     private $dataBody;
+    public $availableMaps;
+
+    const AVAILABLE_MAPS = array(
+        'adf' => array(
+            'sale' => 'Mapper/Rmv3toAdfSaleMap.php',
+            'rent' => 'Mapper/Rmv3toAdfRentMap.php',
+        )
+    );
+
+    /**
+     * Rmv3Parser constructor.
+     * @param array $maps
+     */
+    public function __construct($maps = array())
+    {
+        $this->availableMaps = !empty($maps) ? $maps : self::AVAILABLE_MAPS;
+    }
 
     /**
      * @return mixed

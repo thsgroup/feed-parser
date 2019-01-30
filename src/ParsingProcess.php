@@ -41,27 +41,30 @@ class ParsingProcess
     {
         $output = null;
 
-        if ($this->validateParametersFiles()) {
+        if (!$this->validateParametersFiles()) {
+            return $output;
+        }
 
-            $dataRetriever = new DataRetriever($this->parameters['dirOutput']);
-            $dataRetriever->storeFiles($this->files);
-            $totalFiles = 0;
+        $dataRetriever = new DataRetriever($this->parameters['dirOutput']);
+        $dataRetriever->storeFiles($this->files);
+        $totalFiles = 0;
 
-            foreach ($dataRetriever->getStoredFiles() as $file) {
+        foreach ($dataRetriever->getStoredFiles() as $file) {
 
-                $totalFiles++;
+            $totalFiles++;
 
-                //TODO: logger implementation
-                echo 'PROCESSING FILE: ' . $file . PHP_EOL;
-                $rmv3Parser = ParserFactory::create('rmv3');
+            //TODO: logger implementation
+            echo 'PROCESSING FILE: ' . $file . PHP_EOL;
+            $rmv3Parser = ParserFactory::create($this->parameters['inputFormat'], $this->parameters['maps']);
 
-                if ($rmv3Parser instanceof ParserInterface) {
-                    $rmv3Parser->setFilename($file);
-                    $data = $rmv3Parser->process();
-
-                    $output = $this->outputData($data, $totalFiles);
-                }
+            if (!($rmv3Parser instanceof ParserInterface)) {
+                throw new \RuntimeException('INVALID OR MISSING PARSER: ' . $this->parameters['inputFormat']);
             }
+
+            $rmv3Parser->setFilename($file);
+            $data = $rmv3Parser->process();
+
+            $output = $this->outputData($data, $totalFiles);
         }
 
         if (!$this->validatorSchema->validate($output)) {
@@ -100,24 +103,18 @@ class ParsingProcess
             }
 
             if (!empty($map)) {
-                $mapper = new Mapper($map, $this->parameters['formatOutput'], $this->variables);
-                $mapperRes = $mapper->map($row);
-
-                $mapperSettings = $mapperRes['settings'];
-                $mapperRoot = $mapperRes['root'];
-
-                if (!empty($mapperRes['data'])) {
-                    $mapperOut[] = $mapperRes['data'];
-                } else {
-                    $mapperOut[] = $mapperRoot;
-                }
-
-
-
-                unset($mapper);
-            } else {
                 throw new \RuntimeException('MAP INVALID OR NOT PROVIDED');
             }
+
+            $mapper = new Mapper($map, $this->parameters['formatOutput'], $this->variables);
+            $mapperRes = $mapper->map($row);
+
+            $mapperSettings = $mapperRes['settings'];
+            $mapperRoot = $mapperRes['root'];
+
+            $mapperOut[] = !empty($mapperRes['data']) ? $mapperRes['data'] : $mapperRoot;
+
+            unset($mapper);
         }
 
         $res = !empty($mapperOut) ? $mapperOut : null;
